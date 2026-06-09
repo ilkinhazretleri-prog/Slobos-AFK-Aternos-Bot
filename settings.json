@@ -8,7 +8,7 @@
   "server": {
     "ip": "orospukaanaksu.aternos.me",
     "port": 63451,
-    "version": "",
+    "version": "26.1.2",
     "try-creative": false
   },
   "position": {
@@ -38,7 +38,7 @@
     },
     "chat-log": true,
     "auto-reconnect": true,
-    "auto-reconnect-delay": 2000,
+    "auto-reconnect-delay": 10000,
     "max-reconnect-delay": 120000
   },
   "movement": {
@@ -60,7 +60,7 @@
   "modules": {
     "avoidMobs": true,
     "combat": true,
-    "beds": false,
+    "beds": true,
     "chat": true,
     "console-commands": true
   },
