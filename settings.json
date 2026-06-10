@@ -31,9 +31,9 @@
       "repeat": true,
       "repeat-delay": 120,
       "messages": [
-        "I'm a regular player",
-        "Subscribe to Slobos!",
-        "I like to play Minecraft!"
+        "ilkin beni cezalandirdi",
+        "ben malim beni sikin",
+        "sunucudaki herkes benden ustun"
       ]
     },
     "chat-log": true,
