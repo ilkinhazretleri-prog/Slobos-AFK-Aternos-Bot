@@ -1,3 +1,8 @@
+İşte botunun mevcut tüm özelliklerini (Express paneli, loglama, hareket ve savaş modülleri) koruyan ve içine **Aternos IP Ban Bypass (Otomatik Render Yeniden Başlatma)** sistemini eksiksiz entegre ettiğim tam `index.js` dosyan.
+
+Eski dosyanın içindekileri tamamen silip, aşağıdaki kodun tamamını kopyala-yapıştır yapman yeterlidir. Bot `ETIMEDOUT` (Zaman Aşımı / Aternos Banı) hatası aldığı anda kendini yeniden toparlamaya çalışmak yerine sistemi bilerek çökertecek ve Render'ın ona yeni bir IP vererek baştan açmasını sağlayacaktır.
+
+```javascript
 "use strict";
 
 const { addLog, getLogs } = require("./logger");
@@ -1359,7 +1364,15 @@ function createBot() {
       const msg = err.message || "";
       addLog(`[Bot] Error: ${msg}`);
       botState.errors.push({ type: "error", message: msg, time: Date.now() });
-      // Don't reconnect on error - let 'end' event handle it
+      
+      // --- ATERNOS IP BAN BYPASS ---
+      if (err.code === 'ETIMEDOUT' || msg.includes('ETIMEDOUT') || msg.includes('timed out')) {
+        addLog("[FATAL] Aternos IP Ban yedi! Yeni IP almak için Render zorla yeniden başlatılıyor...");
+        setTimeout(() => {
+          process.exit(1); // Sistemi çökerterek Render'ı yeni IP ile başlatmaya zorlar
+        }, 5000);
+      }
+      // -----------------------------
     });
   } catch (err) {
     addLog(`[Bot] Failed to create bot: ${err.message}`);
@@ -1975,12 +1988,19 @@ function sendDiscordWebhook(content, color = 0x0099ff) {
 }
 
 // ============================================================
-// CRASH RECOVERY - IMMORTAL MODE
-// FIX: guard against uncaughtException stacking reconnects when isReconnecting is already true
+// CRASH RECOVERY - ATERNOS BYPASS MODE
 // ============================================================
 process.on("uncaughtException", (err) => {
   const msg = err.message || "Unknown";
   addLog(`[FATAL] Uncaught Exception: ${msg}`);
+
+  // --- ATERNOS IP BAN BYPASS ---
+  if (msg.includes("ETIMEDOUT") || msg.includes("connect ETIMEDOUT") || msg.includes("timed out")) {
+    addLog("[FATAL] Aternos engeli algılandı. Yeni IP için Render yeniden başlatılıyor...");
+    setTimeout(() => { process.exit(1); }, 5000);
+    return; // Sistemi yeniden başlatacağı için aşağıdaki kurtarma kodlarını çalıştırma
+  }
+
   botState.errors.push({ type: "uncaught", message: msg, time: Date.now() });
 
   // Cap errors array to prevent memory leak over long uptimes
@@ -1992,8 +2012,6 @@ process.on("uncaughtException", (err) => {
     msg.includes("PartialReadError") ||
     msg.includes("ECONNRESET") ||
     msg.includes("EPIPE") ||
-    msg.includes("ETIMEDOUT") ||
-    msg.includes("timed out") ||
     msg.includes("write after end") ||
     msg.includes("This socket has been ended");
 
@@ -2011,7 +2029,6 @@ process.on("uncaughtException", (err) => {
       "[FATAL] isReconnecting was stuck - resetting before crash recovery",
     );
     isReconnecting = false;
-    // BUG FIX: was referencing non-existent 'reconnectTimeout' — correct name is 'reconnectTimeoutId'
     if (reconnectTimeoutId) {
       clearTimeout(reconnectTimeoutId);
       reconnectTimeoutId = null;
@@ -2029,17 +2046,23 @@ process.on("uncaughtException", (err) => {
 process.on("unhandledRejection", (reason) => {
   const msg = String(reason);
   addLog(`[FATAL] Unhandled Rejection: ${reason}`);
+
+  // --- ATERNOS IP BAN BYPASS ---
+  if (msg.includes("ETIMEDOUT") || msg.includes("connect ETIMEDOUT") || msg.includes("timed out")) {
+    addLog("[FATAL] Aternos engeli algılandı. Yeni IP için Render yeniden başlatılıyor...");
+    setTimeout(() => { process.exit(1); }, 5000);
+    return;
+  }
+
   botState.errors.push({ type: "rejection", message: msg, time: Date.now() });
   if (botState.errors.length > 100) {
     botState.errors = botState.errors.slice(-50);
   }
 
   const isNetworkError =
-    msg.includes("ETIMEDOUT") ||
     msg.includes("ECONNRESET") ||
     msg.includes("EPIPE") ||
     msg.includes("ENOTFOUND") ||
-    msg.includes("timed out") ||
     msg.includes("PartialReadError");
 
   if (isNetworkError && !isReconnecting) {
@@ -2067,7 +2090,7 @@ process.on("SIGINT", () => {
 // START THE BOT
 // ============================================================
 addLog("=".repeat(50));
-addLog("  Minecraft AFK Bot v2.5 - Bug-Fixed Edition");
+addLog("  Minecraft AFK Bot v2.5 - Aternos Bypass Edition");
 addLog("=".repeat(50));
 addLog(`Server: ${config.server.ip}:${config.server.port}`);
 addLog(`Version: ${config.server.version}`);
@@ -2077,3 +2100,5 @@ addLog(
 addLog("=".repeat(50));
 
 createBot();
+
+```
