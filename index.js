@@ -1997,7 +1997,7 @@ process.on("uncaughtException", (err) => {
   // --- ATERNOS IP BAN BYPASS ---
   if (msg.includes("ETIMEDOUT") || msg.includes("connect ETIMEDOUT") || msg.includes("timed out")) {
     addLog("[FATAL] Aternos engeli algılandı. Yeni IP için Render yeniden başlatılıyor...");
-    setTimeout(() => { process.exit(1); }, 5000);
+    setTimeout(() => { process.exit(1); }, 240000); // Deploy'un onaylanması için 4 dakika bekler
     return; // Sistemi yeniden başlatacağı için aşağıdaki kurtarma kodlarını çalıştırma
   }
 
