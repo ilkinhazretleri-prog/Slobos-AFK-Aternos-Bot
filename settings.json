@@ -1,14 +1,14 @@
 {
   "name": "AFK Bot",
   "bot-account": {
-    "username": "Slobot00",
+    "username": "MalErdem00",
     "password": "",
     "type": "offline"
   },
   "server": {
-    "ip": "orospukaanaksu.aternos.me",
-    "port": 63451,
-    "version": "26.1.2",
+    "ip": "erdemibitirmeprojesi.aternos.me",
+    "port": 53467,
+    "version": "",
     "try-creative": false
   },
   "position": {
